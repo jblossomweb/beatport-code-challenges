@@ -9,9 +9,48 @@ import axios from 'axios';
  * @param {String} prefix
  * @returns {Object}
  */
-export const integrationFunctions = integrationConfig => { // eslint-disable-line no-unused-vars
-    // Write your solution here
-};
+
+export const integrationFunctions = integrationConfig => Object.keys(integrationConfig).reduce(
+    (api, endpoint) => ({
+        ...api,
+        [endpoint]: integrationConfig[endpoint].methods.reduce(
+            (methods, method) => ({
+                ...methods,
+                [method]: params => axios({
+                    method,
+                    url: (params ? Object.keys(params) || [] : []).reduce(
+                        (url, key) => url.replace(`:${key}`, params[key]),
+                        integrationConfig[endpoint].url,
+                    ),
+                }),
+            }),
+            {},
+        ),
+    }),
+    {},
+);
+
+// note: this gets the job done using loops, but is not quite optimal:
+
+// export const integrationFunctions = integrationConfig => {
+//     const api = {};
+//     for (const endpoint in integrationConfig) {
+//         const config = integrationConfig[endpoint];
+//         api[endpoint] = {};
+//         config.methods.forEach(method => {
+//             api[endpoint][method] = params => {
+//                 const keys = params ? Object.keys(params) || [] : [];
+//                 let url = config.url;
+//                 keys.forEach(key => {
+//                     const value = params[key];
+//                     url = url.replace(`:${key}`, value);
+//                 });
+//                 return axios({ method, url });
+//             };
+//         });
+//     }
+//     return api;
+// };
 
 /**
  *
