@@ -6,9 +6,44 @@
  * @param {String} prefix
  * @returns {Object}
  */
-const prefixFlattenObject = (obj, prefix = '') => { // eslint-disable-line no-unused-vars
-    // Write your solution here
-};
+
+const prefixFlattenObject = (obj, prefix = '') => Object.keys(obj).reduce(
+    (flattened, prop) => {
+        if (typeof obj[prop] === 'object' && !Array.isArray(obj[prop])) {
+            const children = prefixFlattenObject(obj[prop], `${prop}_`);
+            return Object.keys(children).reduce(
+                (a, child) => ({
+                    ...a,
+                    [`${prefix}${child}`]: children[child],
+                }),
+                flattened,
+            );
+        }
+        return {
+            ...flattened,
+            [`${prefix}${prop}`]: obj[prop],
+        };
+    },
+    {},
+);
+
+// note: this gets the job done using loops, but is not quite optimal:
+
+// const prefixFlattenObject = (obj, prefix = '') => {
+//     let flattened = {};
+//     Object.keys(obj).forEach(prop => {
+//         const value = obj[prop];
+//         if (typeof value === 'object' && !Array.isArray(value)) {
+//             const children = prefixFlattenObject(value, `${prop}_`);
+//             Object.keys(children).forEach(child => {
+//                 flattened[`${prefix}${child}`] = children[child];
+//             });
+//         } else {
+//             flattened[`${prefix}${prop}`] = value;
+//         }
+//     });
+//     return flattened;
+// };
 
 const input = {
     prop0: 'value0',
